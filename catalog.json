@@ -1,0 +1,30 @@
+{
+    "metadata": {
+        "date": "2020-05-20T191920",
+        "environment": "prod"
+    },
+    "contents": {
+        "scorecards": [
+            {
+                "public_url": "https://nohost",
+                "code_url": "https://nohost",
+                "code_signature_url": "https://nohost",
+                "hash::sha256": "....",
+                "version": "...",
+                "date": "....",
+                "status": "released"
+            }
+        ],
+        "calculators": [
+            {
+                "public_url": "https://nohost",
+                "code_url": "https://nohost",
+                "code_signature_url": "https://nohost",
+                "hash::sha256": "....",
+                "version": "...",
+                "date": "....",
+                "status": "released"
+            }
+        ]
+    }
+}

@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "environment"
+      ]
+    },
+    "contents": {
+      "type": "object",
+      "properties": {
+        "scorecards": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "public_url": {
+                  "type": "string"
+                },
+                "code_url": {
+                  "type": "string"
+                },
+                "code_signature_url": {
+                  "type": "string"
+                },
+                "hash::sha256": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "date": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "public_url",
+                "code_url",
+                "code_signature_url",
+                "hash::sha256",
+                "version",
+                "date",
+                "status"
+              ]
+            }
+          ]
+        },
+        "calculators": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "public_url": {
+                  "type": "string"
+                },
+                "code_url": {
+                  "type": "string"
+                },
+                "code_signature_url": {
+                  "type": "string"
+                },
+                "hash::sha256": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                },
+                "date": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "public_url",
+                "code_url",
+                "code_signature_url",
+                "hash::sha256",
+                "version",
+                "date",
+                "status"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "scorecards",
+        "calculators"
+      ]
+    }
+  },
+  "required": [
+    "metadata",
+    "contents"
+  ]
+}
