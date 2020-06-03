@@ -12,6 +12,7 @@ class SheetParser:
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
+        self.headers = AttrDict()
         self.num_rows = self.num_cols = 0
         self.sheet = None
 
@@ -23,8 +24,16 @@ class SheetParser:
 
     def parse(self):
         self.open_sheet()
+        self.parse_headers()
         self.parse_questions()
         self.parse_algorithm()
+
+    def parse_headers(self):
+        for col in range(0, self.num_cols):
+            value = self.sheet.cell(0, col).value
+            value = value.strip().lower().replace(' ', '_')
+            if value not in self.headers:
+                self.headers[value] = col
 
     def parse_questions(self):
         for row in range(1, self.num_rows):
@@ -68,6 +77,7 @@ def main():
     parser = SheetParser()
     parser.parse()
 
+    pprint.pprint(parser.headers)
     pprint.pprint(parser.questions)
     pprint.pprint(parser.algorithm)
 
