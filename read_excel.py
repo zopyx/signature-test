@@ -1,60 +1,73 @@
 import xlrd
 import re
+import pprint
+from attrdict import AttrDict
 
-book=xlrd.open_workbook('rechner.xlsx')
-sheet=book.sheet_by_index(0)
-
-num_rows = sheet.nrows
-num_cols = sheet.ncols
 
 def is_question_number(s):
-    return re.match('^\d*\.\d$', s) is not None
+    return re.match("^\d*\.\d$", s) is not None
 
-def is_question_level(s, level=1):
-    if level == 1:
-        return s.count(".") == 0
-    elif level == 2:
-        return s.count(".") == 1
-    raise ValueError(s)
+class SheetParser:
 
+    def __init__(self):
+        self.questions = AttrDict()
+        self.algorithm = AttrDict()
+    
+    def open_sheet(self):
+        book = xlrd.open_workbook("rechner.xlsx")
+        self.sheet = book.sheet_by_index(0)
+        self.num_rows = self.sheet.nrows
+        self.num_cols = self.sheet.ncols
 
-questions = dict()
-algorithm = {}
+    def parse(self):
+        self.open_sheet()
+        self.parse_questions()
+        self.parse_algorithm()
 
-for row in range(1, num_rows):
-    q_number = sheet.cell(row, 0).value
-    q_text = sheet.cell(row, 1).value
-    q_description= sheet.cell(row, 2).value
-    q_label = sheet.cell(row, 3).value
+    def parse_questions(self):
+        for row in range(1, self.num_rows):
+            q_number = self.sheet.cell(row, 0).value
+            q_text = self.sheet.cell(row, 1).value
+            q_description = self.sheet.cell(row, 2).value
+            q_label = self.sheet.cell(row, 3).value
 
-    if not is_question_number(q_number):
-        continue
-    print(q_number, q_text, q_description)
+            if not is_question_number(q_number):
+                continue
 
-    first_number = q_number.split(".")[0]
-    if first_number not in questions:
-        questions[first_number] = dict(
-                question=q_text,
-                desription=q_description, 
-                labels=dict())
-    questions[first_number]['labels'][q_number] = q_label
+            first_number = q_number.split(".")[0]
+            if first_number not in self.questions:
+                self.questions[first_number] = AttrDict(
+                    question=q_text, desription=q_description, labels=dict()
+                )
+            self.questions[first_number]["labels"][q_number] = q_label
 
-for col in range(4, num_cols):
-    options = []
-    for row in range(1, num_rows - 1): 
-        value = sheet.cell(row, col).value
-        if value.lower() != 'x':
-            continue
-        question_number = sheet.cell(row, 0). value
-        options.append(question_number)
-    result = sheet.cell(num_rows - 1, col).value
-    options_key = '|'.join(options)
-    algorithm[options_key] = dict(
-            options=options,
-            result=result)
+    def parse_algorithm(self):
+        for col in range(4, self.num_cols):
+            options = []
+            for row in range(1, self.num_rows - 1):
+                value = self.sheet.cell(row, col).value
+                if value.lower() != "x":
+                    continue
+                question_number = self.sheet.cell(row, 0).value
+                options.append(question_number)
+            result = self.sheet.cell(self.num_rows - 1, col).value
+            options_key = "|".join(options)
+            options_as_text = []
+            for option in options:
+                d = self.questions[option.split(".")[0]]
+                options_as_text.append(f"{d.question}={d.labels[option]}")
+            self.algorithm[options_key] = AttrDict(
+                options=options, options_as_text=options_as_text, result=result
+            )
 
-# process RESULT row
+def main():
 
-import pprint
-pprint.pprint(questions)
-pprint.pprint(algorithm)
+    parser = SheetParser()
+    parser.parse()
+
+    pprint.pprint(parser.questions)
+    pprint.pprint(parser.algorithm)
+
+if __name__ == '__main__':
+    main()
+
