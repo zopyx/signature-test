@@ -39,7 +39,7 @@ class SheetParser:
             first_number = q_number.split(".")[0]
             if first_number not in self.questions:
                 self.questions[first_number] = AttrDict(
-                    question=q_text, desription=q_description, labels=dict()
+                    question=q_text, description=q_description, labels=dict()
                 )
             self.questions[first_number]["labels"][q_number] = q_label
 
