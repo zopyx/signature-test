@@ -1,17 +1,19 @@
-import xlrd
 import re
 import pprint
+import xlrd
 from attrdict import AttrDict
 
 
-def is_question_number(s):
-    return re.match("^\d*\.\d$", s) is not None
+def is_question_number(number):
+    return re.match(r"^\d*\.\d$", number) is not None
 
 
 class SheetParser:
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
+        self.num_rows = self.num_cols = 0
+        self.sheet = None
 
     def open_sheet(self):
         book = xlrd.open_workbook("rechner.xlsx")
