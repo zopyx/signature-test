@@ -5,7 +5,7 @@ book=xlrd.open_workbook('rechner.xlsx')
 sheet=book.sheet_by_index(0)
 
 num_rows = sheet.nrows
-
+num_cols = sheet.ncols
 
 def is_question_number(s):
     return re.match('^\d*\.\d$', s) is not None
@@ -19,6 +19,7 @@ def is_question_level(s, level=1):
 
 
 questions = dict()
+algorithm = {}
 
 for row in range(1, num_rows):
     q_number = sheet.cell(row, 0).value
@@ -38,5 +39,22 @@ for row in range(1, num_rows):
                 labels=dict())
     questions[first_number]['labels'][q_number] = q_label
 
+for col in range(4, num_cols):
+    options = []
+    for row in range(1, num_rows - 1): 
+        value = sheet.cell(row, col).value
+        if value.lower() != 'x':
+            continue
+        question_number = sheet.cell(row, 0). value
+        options.append(question_number)
+    result = sheet.cell(num_rows - 1, col).value
+    options_key = '|'.join(options)
+    algorithm[options_key] = dict(
+            options=options,
+            result=result)
+
+# process RESULT row
+
 import pprint
 pprint.pprint(questions)
+pprint.pprint(algorithm)
