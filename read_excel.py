@@ -7,12 +7,12 @@ from attrdict import AttrDict
 def is_question_number(s):
     return re.match("^\d*\.\d$", s) is not None
 
-class SheetParser:
 
+class SheetParser:
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
-    
+
     def open_sheet(self):
         book = xlrd.open_workbook("rechner.xlsx")
         self.sheet = book.sheet_by_index(0)
@@ -60,6 +60,7 @@ class SheetParser:
                 options=options, options_as_text=options_as_text, result=result
             )
 
+
 def main():
 
     parser = SheetParser()
@@ -68,6 +69,6 @@ def main():
     pprint.pprint(parser.questions)
     pprint.pprint(parser.algorithm)
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()
