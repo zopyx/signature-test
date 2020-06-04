@@ -8,7 +8,31 @@ def is_question_number(number):
     return re.match(r"^\d*\.\d$", number) is not None
 
 
+def normalized(s):
+    return s.strip().lower().replace(' ', '_')
+
+class MissingHeader(Exception):
+
+    def __init__(self, header_name):
+        self.header_name = header_name
+
+    def __str__(self):
+        return f'{self.__class__.__name__}: {self.header_name}'
+
+class UnknownHeader(MissingHeader):
+    pass        
+
+
+expected_headers = [
+    'Question',
+    'Number',
+    'Description',
+    'Result',
+    'Answer_label'
+]
+
 class SheetParser:
+
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
@@ -16,14 +40,15 @@ class SheetParser:
         self.num_rows = self.num_cols = 0
         self.sheet = None
 
-    def open_sheet(self):
-        book = xlrd.open_workbook("rechner.xlsx")
+    def open_sheet(self, excel_filename):
+        book = xlrd.open_workbook(excel_filename)
         self.sheet = book.sheet_by_index(0)
         self.num_rows = self.sheet.nrows
         self.num_cols = self.sheet.ncols
+        self.errors = []
 
-    def parse(self):
-        self.open_sheet()
+    def parse(self, excel_filename):
+        self.open_sheet(excel_filename)
         self.parse_headers()
         self.parse_questions()
         self.parse_algorithm()
@@ -31,9 +56,18 @@ class SheetParser:
     def parse_headers(self):
         for col in range(0, self.num_cols):
             value = self.sheet.cell(0, col).value
-            value = value.strip().lower().replace(' ', '_')
+            value = normalized(value)
             if value not in self.headers:
                 self.headers[value] = col
+
+        for name in expected_headers:
+            if not normalized(name) in self.headers:
+                self.errors.append(MissingHeader(name))
+
+        expected_headers_normalized = [normalized(name) for name in expected_headers]
+        for name in self.headers:
+            if name not in expected_headers_normalized: 
+                self.errors.append(UnknownHeader(name))
 
     def parse_questions(self):
         for row in range(1, self.num_rows):
@@ -74,12 +108,19 @@ class SheetParser:
 
 def main():
 
-    parser = SheetParser()
-    parser.parse()
+    import argparse
 
-    pprint.pprint(parser.headers)
-    pprint.pprint(parser.questions)
-    pprint.pprint(parser.algorithm)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--filename', default='rechner.xlsx')
+    options = parser.parse_args()
+
+    s_parser = SheetParser()
+    s_parser.parse(options.filename)
+
+    pprint.pprint(s_parser.headers)
+    pprint.pprint(s_parser.questions)
+    pprint.pprint(s_parser.algorithm)
+    pprint.pprint(s_parser.errors)
 
 
 if __name__ == "__main__":
