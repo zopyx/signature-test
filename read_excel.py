@@ -6,14 +6,19 @@ from attrdict import AttrDict
 
 
 def is_question_number(number: str):
+    """ Check if the given `number` is in the format 
+        <number.<number>
+    """
     return re.match(r"^\d*\.\d$", number) is not None
 
 
 def normalized(s: str):
+    """ create a lowercase normalized representation of `s`"""
     return s.strip().lower().replace(" ", "_")
 
 
 class MissingHeader(Exception):
+    """ Exception for a missing header line in Excel sheet """
 
     def __init__(self, header_name: str):
         self.header_name = header_name
@@ -21,9 +26,22 @@ class MissingHeader(Exception):
     def __str__(self):
         return f"{self.__class__.__name__}: {self.header_name}"
 
+    __repr__ = __str__
+
 
 class UnknownHeader(MissingHeader):
-    pass
+    """ Exception for unknown header line in Excel sheet"""
+
+
+class NoAlgorithmResult(Exception):
+    def __init__(self, row: int, col: int):
+        self.row = row
+        self.col = col
+
+    def __str__(self):
+        return f"{self.__class__.__name__}: Result reference missing in row {self.row}, column {self.col}"
+
+    __repr__ = __str__
 
 
 expected_headers = ["Question", "Number", "Description", "Result", "Answer label"]
@@ -58,7 +76,7 @@ class SheetParser:
                 self.headers[value] = col
 
         for name in expected_headers:
-            if not normalized(name) in self.headers:
+            if normalized(name) not in self.headers:
                 self.errors.append(MissingHeader(name))
 
         expected_headers_normalized = [normalized(name) for name in expected_headers]
@@ -86,7 +104,7 @@ class SheetParser:
             self.questions[first_number]["labels"][q_number] = q_label
 
     def parse_algorithm(self):
-        for col in range(4, self.num_cols):
+        for col in range(self.headers.result, self.num_cols):
             options = []
             for row in range(1, self.num_rows - 1):
                 value = self.sheet.cell(row, col).value
@@ -94,7 +112,12 @@ class SheetParser:
                     continue
                 question_number = self.sheet.cell(row, 0).value
                 options.append(question_number)
+
+            # the last row contains the result (references)
             result = self.sheet.cell(self.num_rows - 1, col).value
+            if not result:
+                self.errors.append(NoAlgorithmResult(self.num_rows, col+1))
+
             options_key = "|".join(options)
             options_as_text = []
             for option in options:
