@@ -116,7 +116,7 @@ class SheetParser:
             # the last row contains the result (references)
             result = self.sheet.cell(self.num_rows - 1, col).value
             if not result:
-                self.errors.append(NoAlgorithmResult(self.num_rows, col+1))
+                self.errors.append(NoAlgorithmResult(self.num_rows, col + 1))
 
             options_key = "|".join(options)
             options_as_text = []
