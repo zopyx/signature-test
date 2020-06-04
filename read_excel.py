@@ -1,53 +1,50 @@
 import re
 import pprint
 import xlrd
+
 from attrdict import AttrDict
 
 
-def is_question_number(number):
+def is_question_number(number: str):
     return re.match(r"^\d*\.\d$", number) is not None
 
 
-def normalized(s):
-    return s.strip().lower().replace(' ', '_')
+def normalized(s: str):
+    return s.strip().lower().replace(" ", "_")
+
 
 class MissingHeader(Exception):
 
-    def __init__(self, header_name):
+    def __init__(self, header_name: str):
         self.header_name = header_name
 
     def __str__(self):
-        return f'{self.__class__.__name__}: {self.header_name}'
+        return f"{self.__class__.__name__}: {self.header_name}"
+
 
 class UnknownHeader(MissingHeader):
-    pass        
+    pass
 
 
-expected_headers = [
-    'Question',
-    'Number',
-    'Description',
-    'Result',
-    'Answer_label'
-]
+expected_headers = ["Question", "Number", "Description", "Result", "Answer label"]
+
 
 class SheetParser:
-
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
         self.headers = AttrDict()
         self.num_rows = self.num_cols = 0
         self.sheet = None
+        self.errors = []
 
-    def open_sheet(self, excel_filename):
+    def open_sheet(self, excel_filename: str):
         book = xlrd.open_workbook(excel_filename)
         self.sheet = book.sheet_by_index(0)
         self.num_rows = self.sheet.nrows
         self.num_cols = self.sheet.ncols
-        self.errors = []
 
-    def parse(self, excel_filename):
+    def parse(self, excel_filename: str):
         self.open_sheet(excel_filename)
         self.parse_headers()
         self.parse_questions()
@@ -66,15 +63,17 @@ class SheetParser:
 
         expected_headers_normalized = [normalized(name) for name in expected_headers]
         for name in self.headers:
-            if name not in expected_headers_normalized: 
+            if name not in expected_headers_normalized:
                 self.errors.append(UnknownHeader(name))
 
     def parse_questions(self):
+
+        cell = self.sheet.cell
         for row in range(1, self.num_rows):
-            q_number = self.sheet.cell(row, 0).value
-            q_text = self.sheet.cell(row, 1).value
-            q_description = self.sheet.cell(row, 2).value
-            q_label = self.sheet.cell(row, 3).value
+            q_number = cell(row, self.headers.number).value
+            q_text = cell(row, self.headers.question).value
+            q_description = cell(row, self.headers.description).value
+            q_label = cell(row, self.headers.answer_label).value
 
             if not is_question_number(q_number):
                 continue
@@ -111,7 +110,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--filename', default='rechner.xlsx')
+    parser.add_argument("-f", "--filename", default="rechner.xlsx")
     options = parser.parse_args()
 
     s_parser = SheetParser()
