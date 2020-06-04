@@ -48,6 +48,8 @@ expected_headers = ["Question", "Number", "Description", "Result", "Answer label
 
 
 class SheetParser:
+    """ Excelsheet parser """
+    
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
