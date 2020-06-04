@@ -44,8 +44,18 @@ class NoAlgorithmResult(Exception):
     __repr__ = __str__
 
 
-expected_headers = ["Question", "Number", "Description", "Result", "Answer label"]
+class NoValidOption(Exception):
+    def __init__(self, value: str, row: int, col: int):
+        self.value = value
+        self.row = row
+        self.col = col
 
+    def __str__(self):
+        return f"{self.__class__.__name__}: Invalid option '{self.value}' in  row {self.row}, column {self.col}"
+
+    __repr__ = __str__
+expected_headers = ["Question", "Number", "Description", "Result", "Answer label"]
+valid_options = ['x', 'yes', 'no']
 
 class SheetParser:
     """ Excelsheet parser """
@@ -110,8 +120,11 @@ class SheetParser:
             options = []
             for row in range(1, self.num_rows - 1):
                 value = self.sheet.cell(row, col).value
-                if value.lower() != "x":
+                value = value.lower()
+                if not value:
                     continue
+                if value not in valid_options:
+                    self.errors.append(NoValidOption(value, row+1, col+1))
                 question_number = self.sheet.cell(row, 0).value
                 options.append(question_number)
 
