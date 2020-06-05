@@ -1,10 +1,12 @@
+import os
 import re
 import pprint
 import xlrd
+from typeguard import typechecked
 
 from attrdict import AttrDict
 
-
+@typechecked
 def is_question_number(number: str):
     """ Check if the given `number` is in the format 
         <number.<number>
@@ -12,6 +14,7 @@ def is_question_number(number: str):
     return re.match(r"^\d*\.\d$", number) is not None
 
 
+@typechecked
 def normalized(s: str):
     """ create a lowercase normalized representation of `s`"""
     return s.strip().lower().replace(" ", "_")
@@ -85,15 +88,21 @@ class SheetParser:
         self.sheet = None
         self.errors = []
 
+    @typechecked
     def open_sheet(self, excel_filename: str):
         book = xlrd.open_workbook(excel_filename)
         self.sheet = book.sheet_by_index(0)
         self.num_rows = self.sheet.nrows
         self.num_cols = self.sheet.ncols
 
+    @typechecked
     def parse(self, excel_filename: str):
+
+        if not os.path.exists(excel_filename):
+            raise IOError(f"Excel file '{excel_filename}' does not exist")
+
         try:
-            return self._parse(excel_filename)
+            self._parse(excel_filename)
         except Exception as e:
             raise ParserError(f"Unable to parse Excel file '{excel_filename}': {e}", exception=e)
 
@@ -101,6 +110,7 @@ class SheetParser:
             raise ParserError(f"Parsed Excel file '{excel_filename}' contains errors: {self.errors}", errors=self.errors)
 
 
+    @typechecked
     def _parse(self, excel_filename: str):
         self.open_sheet(excel_filename)
         self.parse_headers()

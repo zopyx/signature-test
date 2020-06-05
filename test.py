@@ -16,3 +16,8 @@ def test_working_invalid_filename():
     parser = SheetParser()
     with pytest.raises(IOError):
         parser.parse("nosuchfile.xlsx")
+
+def test_working_invalid_filename2():
+    parser = SheetParser()
+    with pytest.raises(TypeError):
+        parser.parse(42)
