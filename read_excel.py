@@ -104,7 +104,7 @@ class SheetParser:
         try:
             self._parse(excel_filename)
         except Exception as e:
-            raise ParserError(f"Unable to parse Excel file '{excel_filename}': {e}", exception=e)
+            raise ParserError(f"Unable to parse Excel file '{excel_filename}': {e}", exception=e, errors=self.errors)
 
         if self.errors:
             raise ParserError(f"Parsed Excel file '{excel_filename}' contains errors: {self.errors}", errors=self.errors)
