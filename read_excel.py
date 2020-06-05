@@ -54,6 +54,23 @@ class NoValidOption(Exception):
         return f"{self.__class__.__name__}: Invalid option '{self.value}' in  row {self.row}, column {self.col}"
 
     __repr__ = __str__
+
+
+class ParserError(Exception):
+    """ Parser error """
+
+    def __init__(self, message, exception=None, errors=[]):
+        self.message = message
+        self.exception = exception
+        self.errors = errors
+
+    def __str__(self):
+        return f"{self.__class__.__name__}\nexception: {self.exception}\nerrors: {self.errors}"
+
+    __repr__ = __str__
+
+
+
 expected_headers = ["Question", "Number", "Description", "Result", "Answer label"]
 valid_options = ['x', 'yes', 'no']
 
@@ -75,6 +92,16 @@ class SheetParser:
         self.num_cols = self.sheet.ncols
 
     def parse(self, excel_filename: str):
+        try:
+            return self._parse(excel_filename)
+        except Exception as e:
+            raise ParserError(f"Unable to parse Excel file '{excel_filename}': {e}", exception=e)
+
+        if self.errors:
+            raise ParserError(f"Parsed Excel file '{excel_filename}' contains errors: {self.errors}", errors=self.errors)
+
+
+    def _parse(self, excel_filename: str):
         self.open_sheet(excel_filename)
         self.parse_headers()
         self.parse_questions()

@@ -1,3 +1,5 @@
 cryptography
 jsonschema
 wheel
+attrdict
+xlrd
