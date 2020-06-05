@@ -6,6 +6,7 @@ from typeguard import typechecked
 
 from attrdict import AttrDict
 
+
 @typechecked
 def is_question_number(number: str):
     """ Check if the given `number` is in the format 
@@ -73,13 +74,13 @@ class ParserError(Exception):
     __repr__ = __str__
 
 
-
 expected_headers = ["Question", "Number", "Description", "Result", "Answer label"]
-valid_options = ['x', 'yes', 'no']
+valid_options = ["x", "yes", "no"]
+
 
 class SheetParser:
     """ Excelsheet parser """
-    
+
     def __init__(self):
         self.questions = AttrDict()
         self.algorithm = AttrDict()
@@ -104,11 +105,17 @@ class SheetParser:
         try:
             self._parse(excel_filename)
         except Exception as e:
-            raise ParserError(f"Unable to parse Excel file '{excel_filename}': {e}", exception=e, errors=self.errors)
+            raise ParserError(
+                f"Unable to parse Excel file '{excel_filename}': {e}",
+                exception=e,
+                errors=self.errors,
+            )
 
         if self.errors:
-            raise ParserError(f"Parsed Excel file '{excel_filename}' contains errors: {self.errors}", errors=self.errors)
-
+            raise ParserError(
+                f"Parsed Excel file '{excel_filename}' contains errors: {self.errors}",
+                errors=self.errors,
+            )
 
     @typechecked
     def _parse(self, excel_filename: str):
@@ -161,7 +168,7 @@ class SheetParser:
                 if not value:
                     continue
                 if value not in valid_options:
-                    self.errors.append(NoValidOption(value, row+1, col+1))
+                    self.errors.append(NoValidOption(value, row + 1, col + 1))
                 question_number = self.sheet.cell(row, 0).value
                 options.append(question_number)
 
